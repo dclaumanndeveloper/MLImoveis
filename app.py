@@ -31,7 +31,7 @@ if prever_preco:
     
     else:
         valor = calcula_valor(metragem)
-        #st.write()
+        #Mensagens de sucesso e previsão
         st.success("Preço previsto com sucesso!")
         st.info(f"O valor do imóvel de {metragem:.2f} m2 no bairro {bairro} é de R$ {valor:,.2f}.")
         
