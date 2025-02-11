@@ -7,8 +7,8 @@ with open("modelo_treinado.pkl","rb") as file:
     modelo = pickle.load(file)
     
     
-def calcula_valor(metragem):    
-    dados = pd.DataFrame({'m2': [metragem]})
+def calcula_valor(metragem, bairro):    
+    dados = pd.DataFrame({'m2': [metragem], 'bairro': [bairro]})
     valor = modelo.predict(dados)[0][0]
     return valor
     
@@ -30,7 +30,7 @@ if prever_preco:
         st.error("O valor do imóvel não pode ser R$0.")
     
     else:
-        valor = calcula_valor(metragem)
+        valor = calcula_valor(metragem, bairro)
         #Mensagens de sucesso e previsão
         st.success("Preço previsto com sucesso!")
         st.info(f"O valor do imóvel de {metragem:.2f} m2 no bairro {bairro} é de R$ {valor:,.2f}.")
