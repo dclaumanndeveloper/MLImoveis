@@ -6,8 +6,6 @@ import pickle
 
 df = pd.read_csv('dataset.csv')
 
-#criar o modelo de ML
-
 modelo = linear_model.LinearRegression()
 
 x = df[['m2']]
@@ -15,12 +13,10 @@ y = df[['valor']]
 
 x_treino, x_teste, y_treino, y_teste = train_test_split(x,y)
 
-# treinando o modelo de ML
 modelo.fit(x_treino,y_treino)
 
 previsoes = modelo.predict(x_teste)
 
-#testar o modelo
 acuracidade =  round(r2_score(y_teste,previsoes) * 100,2)
 print(f"A acuracidade do modelo é de {acuracidade}%")
 
