@@ -1,27 +1,13 @@
 import pandas as pd
-from sklearn import linear_model
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-import pickle
+from ml import treinar_modelo, salvar_modelo
 
 df = pd.read_csv('dataset.csv')
 
-modelo = linear_model.LinearRegression()
+modelo, acuracidade = treinar_modelo(df)
 
-x = df[['m2']]
-y = df[['valor']]
+print(f"Acurácia do modelo (R²): {acuracidade}%")
+print(f"Coeficientes: m²={modelo.coef_[0][0]:.2f}, bairro={modelo.coef_[0][1]:.2f}")
+print(f"Intercepto: {modelo.intercept_[0]:.2f}")
 
-x_treino, x_teste, y_treino, y_teste = train_test_split(x,y)
-
-modelo.fit(x_treino,y_treino)
-
-previsoes = modelo.predict(x_teste)
-
-acuracidade =  round(r2_score(y_teste,previsoes) * 100,2)
-print(f"A acuracidade do modelo é de {acuracidade}%")
-
-
-
-
-with open("modelo_treinado.pkl","wb") as file:
-    pickle.dump(modelo,file)
+salvar_modelo(modelo)
+print("Modelo salvo em modelo_treinado.pkl")
