@@ -10,9 +10,10 @@ emergente mais barata, ~R$ 3.800–5.000/m²; média da cidade ~R$ 5.774/m²).
 São valores aproximados de conteúdo de marketing, não estatística oficial —
 os dados continuam sendo simulados (fórmula + ruído), não transações reais.
 
-Quartos e vagas de garagem somam um valor fixo ao preço final. Um ruído
-gaussiano é adicionado para simular variação de mercado. A semente fixa
-garante reprodutibilidade.
+Quartos e vagas de garagem somam um valor fixo ao preço final. Imóveis mais
+novos e apartamentos (vs. casas) recebem um pequeno prêmio; a distância do
+centro reduz o valor. Um ruído gaussiano é adicionado para simular variação
+de mercado. A semente fixa garante reprodutibilidade.
 
 Uso:
     python gerar_dataset.py
@@ -22,6 +23,8 @@ import pandas as pd
 
 SEED = 42
 IMOVEIS_POR_BAIRRO = 60
+ANO_ATUAL = 2026
+ANO_CONSTRUCAO_MINIMO = 1975
 
 PRECO_M2_BASE = {
     'Zona 1': 6200,
@@ -34,8 +37,13 @@ PRECO_M2_BASE = {
     'Zona 8': 4400,
 }
 
+TIPOS_IMOVEL = ['Casa', 'Apartamento']
+AJUSTE_TIPO_IMOVEL = {'Casa': 1.0, 'Apartamento': 1.08}
+
 BONUS_QUARTO = 40000
 BONUS_VAGA = 25000
+BONUS_POR_ANO_CONSTRUCAO = 1500
+PENALIDADE_POR_KM_DO_CENTRO = 6000
 RUIDO_DESVIO_PADRAO = 45000
 
 
@@ -45,9 +53,22 @@ def gerar_dataset(rng: np.random.Generator) -> pd.DataFrame:
         m2 = rng.uniform(40, 220, IMOVEIS_POR_BAIRRO).round(0)
         quartos = rng.integers(1, 5, IMOVEIS_POR_BAIRRO)
         vagas = rng.integers(0, 4, IMOVEIS_POR_BAIRRO)
+        ano_construcao = rng.integers(ANO_CONSTRUCAO_MINIMO, ANO_ATUAL, IMOVEIS_POR_BAIRRO)
+        distancia_centro_km = rng.uniform(0.5, 12, IMOVEIS_POR_BAIRRO).round(1)
+        tipo_imovel = rng.choice(TIPOS_IMOVEL, IMOVEIS_POR_BAIRRO)
         ruido = rng.normal(0, RUIDO_DESVIO_PADRAO, IMOVEIS_POR_BAIRRO)
 
-        valor = (m2 * preco_m2) + (quartos * BONUS_QUARTO) + (vagas * BONUS_VAGA) + ruido
+        ajuste_tipo = np.array([AJUSTE_TIPO_IMOVEL[t] for t in tipo_imovel])
+        idade_relativa = ano_construcao - ANO_CONSTRUCAO_MINIMO
+
+        valor = (
+            (m2 * preco_m2 * ajuste_tipo)
+            + (quartos * BONUS_QUARTO)
+            + (vagas * BONUS_VAGA)
+            + (idade_relativa * BONUS_POR_ANO_CONSTRUCAO)
+            - (distancia_centro_km * PENALIDADE_POR_KM_DO_CENTRO)
+            + ruido
+        )
         valor = valor.round(2).clip(min=1000)
 
         for i in range(IMOVEIS_POR_BAIRRO):
@@ -55,6 +76,9 @@ def gerar_dataset(rng: np.random.Generator) -> pd.DataFrame:
                 'm2': m2[i],
                 'quartos': int(quartos[i]),
                 'vagas': int(vagas[i]),
+                'ano_construcao': int(ano_construcao[i]),
+                'distancia_centro_km': distancia_centro_km[i],
+                'tipo_imovel': tipo_imovel[i],
                 'bairro': bairro,
                 'valor': valor[i],
             })
