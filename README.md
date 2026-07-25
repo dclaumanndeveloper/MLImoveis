@@ -74,7 +74,9 @@ curl -X POST http://localhost:8000/prever \
 
 ### Gerar/atualizar o dataset
 
-O dataset é sintético e gerado de forma reprodutível (semente fixa) a partir de um preço-base por m² de cada bairro, somado a bônus por quarto e vaga de garagem, com ruído gaussiano simulando variação de mercado:
+O dataset é **sintético** (fórmula + ruído, semente fixa para reprodutibilidade) — não existe hoje um dataset público confiável com preços reais de imóveis individuais em Maringá: a prefeitura não publica o "valor venal" em lote (só consulta por imóvel específico) e os portais de anúncios (ZAP, VivaReal, OLX, Imovelweb) proíbem coleta automatizada nos termos de uso.
+
+O preço-base por m² de cada bairro foi calibrado com médias de mercado citadas por blogs de imobiliárias locais em 2026 (ex.: Zona 3 como bairro mais valorizado, ~R$ 6.500–8.500/m²; Zona 8 como região emergente mais barata, ~R$ 3.800–5.000/m²; média da cidade ~R$ 5.774/m²) — valores de conteúdo de marketing, não estatística oficial, então servem apenas para dar uma ordem de grandeza e uma hierarquia plausível entre bairros. Quartos e vagas somam um valor fixo, e um ruído gaussiano simula variação de mercado:
 
 ```bash
 python gerar_dataset.py
@@ -135,7 +137,7 @@ O `ml.py` monta um `Pipeline` scikit-learn com:
 | `vagas` | Número de vagas de garagem |
 | `bairro` | Bairro (codificado via one-hot encoding) |
 
-**Resultado atual:** R² ≈ 97% no conjunto de teste com o dataset padrão (Gradient Boosting escolhido automaticamente).
+**Resultado atual:** R² ≈ 96% no conjunto de teste com o dataset padrão (Gradient Boosting escolhido automaticamente), MAE ≈ R$ 50,7 mil e RMSE ≈ R$ 64,1 mil — números altos em reais porque o dataset agora simula preços de imóvel em escala real (centenas de milhares de reais), calibrados como descrito acima.
 
 ## Limitações e próximos passos
 
