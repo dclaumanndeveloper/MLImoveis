@@ -1,13 +1,21 @@
 import pandas as pd
-from ml import treinar_modelo, salvar_modelo
+from ml import salvar_modelo, treinar_modelo
 
 df = pd.read_csv('dataset.csv')
 
-modelo, acuracidade = treinar_modelo(df)
+resultado = treinar_modelo(df)
 
-print(f"Acurácia do modelo (R²): {acuracidade}%")
-print(f"Coeficientes: m²={modelo.coef_[0][0]:.2f}, bairro={modelo.coef_[0][1]:.2f}")
-print(f"Intercepto: {modelo.intercept_[0]:.2f}")
+print("Comparação de modelos (R² médio em validação cruzada):")
+for nome, r2_cv in sorted(resultado.comparacao.items(), key=lambda item: item[1], reverse=True):
+    destaque = " <- escolhido" if nome == resultado.nome_modelo else ""
+    print(f"  {nome}: {r2_cv}%{destaque}")
 
-salvar_modelo(modelo)
-print("Modelo salvo em modelo_treinado.pkl")
+print()
+print(f"Modelo escolhido: {resultado.nome_modelo}")
+print(f"R² médio (validação cruzada): {resultado.cv_r2_medio}%")
+print(f"R² (conjunto de teste): {resultado.r2_teste}%")
+print(f"MAE (conjunto de teste): R$ {resultado.mae_teste:,.2f}")
+print(f"RMSE (conjunto de teste): R$ {resultado.rmse_teste:,.2f}")
+
+salvar_modelo(resultado.pipeline)
+print("\nModelo salvo em modelo_treinado.pkl")
