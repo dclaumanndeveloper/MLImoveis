@@ -98,6 +98,10 @@ pytest
 
 Os testes cobrem o treinamento/seleção de modelo, o pré-processamento de dados de entrada, a predição, a serialização do modelo e os endpoints da API REST.
 
+## Integração contínua (CI)
+
+O workflow `.github/workflows/ci.yml` roda automaticamente em pushes para `main` e em pull requests: instala as dependências via Poetry, executa a suíte `pytest` e treina o modelo (`script.py`) como smoke test do pipeline de ML.
+
 ## Estrutura do projeto
 
 ```
@@ -142,6 +146,7 @@ Este projeto é um MVP educacional. Pontos já endereçados e próximos passos:
 - [x] Adicionar validação cruzada e métricas de erro (R², MAE, RMSE)
 - [x] Adicionar testes automatizados
 - [x] Expor API REST além da interface Streamlit
+- [x] Configurar CI (GitHub Actions) rodando os testes a cada push/PR
 - [ ] Substituir o dataset sintético por dados reais de mercado
 - [ ] Adicionar mais variáveis (ano de construção, distância do centro, tipo de imóvel)
-- [ ] Criar pipeline de retreinamento automatizado (CI agendado) com monitoramento de drift
+- [ ] Agendar retreinamento periódico do modelo no CI, com monitoramento de drift
