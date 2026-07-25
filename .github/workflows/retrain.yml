@@ -1,0 +1,37 @@
+name: Retreinamento agendado
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # toda segunda-feira às 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Retreinar modelo e checar saúde/drift
+        run: poetry run python script.py
+
+      - name: Commit modelo e histórico de métricas atualizados
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: retreinamento agendado do modelo"
+          file_pattern: modelo_treinado.pkl metrics_historico.csv
